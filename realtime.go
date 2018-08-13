@@ -23,7 +23,7 @@ const (
 [Service]
 Slice=realtime.slice
 CPUAccounting=yes
-ExecStartPost=/bin/bash -c 'echo %d > %s'
+ExecStartPre=/bin/bash -c 'echo %d > %s'
 `
 	START = `[Service]
 Slice=realtime.slice
