@@ -35,6 +35,8 @@ RemainAfterExit=yes
 var (
 	optVerbose = flag.Bool("v", false, "verbose mode")
 	optClean   = flag.Bool("c", false, "only clean generated drop-ins")
+	optRuntime = flag.Bool("l", false, "show default runtime budget")
+	optSetRuntime = flag.Int("r", 0, "set default runtime budget")
 )
 
 type Config struct {
@@ -76,19 +78,27 @@ func createStartUnit() bool {
 	return false
 }
 
-// Read the default runtime_us or period_us from the /proc tree.
-func readDefault(name string) (value int) {
-	p := "/proc/sys/kernel/sched_rt_" + name + "_us"
-	data, err := ioutil.ReadFile(p)
+func readDefault() string {
+	b, err := ioutil.ReadFile("/sys/fs/cgroup/cpu/cpu.rt_runtime_us")
 	if err != nil {
-		log.Fatalf("cannot read %s", p)
+		log.Fatalf("failed to read: %v", err)
 	}
-	data = bytes.TrimSpace(data)
-	value, err = strconv.Atoi(string(data))
+	return string(bytes.TrimSpace(b))
+}
+
+func readDefaultInt() int {
+	v, err := strconv.Atoi(readDefault())
 	if err != nil {
-		log.Fatalf("failed to convert %s_us", name)
+		log.Fatalf("failed to convert runtime_us")
 	}
-	return
+	return v
+}
+
+func writeDefault(value int) {
+	err := ioutil.WriteFile("/sys/fs/cgroup/cpu/cpu.rt_runtime_us", []byte(strconv.Itoa(value)), 0644)
+	if err != nil {
+		log.Fatalf("failed to write: %v", err)
+	}
 }
 
 // Find unit in systemd directories.
@@ -242,6 +252,14 @@ func main() {
 		deleteDropins()
 		return
 	}
+	if *optRuntime {
+		fmt.Println(readDefault())
+		return
+	}
+	if *optSetRuntime > 0 {
+		writeDefault(*optSetRuntime)
+		return
+	}
 
 	ok := createStartUnit()
 	if ok {
@@ -253,7 +271,7 @@ func main() {
 		log.Fatalf("failed to start realtime-start.service: %v", err)
 	}
 
-	rootRuntime := readDefault("runtime")
+	rootRuntime := readDefaultInt()
 	config, err := readConfig(rootRuntime)
 	if err != nil {
 		log.Fatal(err)

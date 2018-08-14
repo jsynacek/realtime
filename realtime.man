@@ -6,12 +6,25 @@ realtime [
 .B -c
 ]
 [
+.B -l
+]
+[
+.B -r
+budget ]
+[
 .B -v
 ]
 .SH OPTIONS
 .TP
 .B -c
 Clean generated configuration, if any, and exit.
+.TP
+.B -l
+Show default runtime budget and exit.
+.TP
+.BI -r\  runtime_us
+Set default runtime budget to \fIruntime_us\fR and exit. This might not work when there already
+exists a cgroup with a runtime budget in use on the system.
 .TP
 .B -v
 Turn on verbose mode.
