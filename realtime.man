@@ -36,6 +36,8 @@ are discarded.
 .SH CONFIGURATION
 Configuration is read from
 .B /etc/systemd/realtime.conf
+and from
+.B /etc/systemd/realtime.cond.d/*.conf
 and is expected to be in the following format:
 
     <service 1> : <runtime_us 1>
@@ -45,17 +47,27 @@ and is expected to be in the following format:
 Service names can be specified with or without the ".service" suffix.
 Any empty lines are ignored. Items can be separated by any amount of white space.
 
+Configuration files located in
+.B /etc/systemd/realtime.conf.d/
+are read in alphabetical order and must end with
+\fB.conf\fR. If a service is assigned value multiple times, the last value updates the previous ones.
+
 Note that the sum of all runtime_us values cannot be higher than runtime_us value set for realtime.slice.
 
 .SH EXAMPLE
 # cat /etc/systemd/realtime.conf
 
-    cups  : 125000
+    cups  : 100000
     tftp  : 250000
-    httpd : 500000
+    httpd : 400000
+
+# cat /etc/systemd/realtime.conf.d/vsftpd.conf
+
+    vsftpd : 200000
 
 # realtime -v
 
+    2018/08/13 10:43:24 creating /etc/systemd/system/vsftpd.service.d/99-realtime.conf for vsftpd.service
     2018/08/13 10:43:24 creating /etc/systemd/system/cups.service.d/99-realtime.conf for cups.service
     2018/08/13 10:43:24 creating /etc/systemd/system/tftp.service.d/99-realtime.conf for tftp.service
     2018/08/13 10:43:24 creating /etc/systemd/system/httpd.service.d/99-realtime.conf for httpd.service
