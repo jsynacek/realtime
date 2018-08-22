@@ -33,9 +33,9 @@ RemainAfterExit=yes
 )
 
 var (
-	optVerbose = flag.Bool("v", false, "verbose mode")
-	optClean   = flag.Bool("c", false, "only clean generated drop-ins")
-	optRuntime = flag.Bool("l", false, "show default runtime budget")
+	optVerbose    = flag.Bool("v", false, "verbose mode")
+	optClean      = flag.Bool("c", false, "only clean generated drop-ins")
+	optRuntime    = flag.Bool("l", false, "show default runtime budget")
 	optSetRuntime = flag.Int("r", 0, "set default runtime budget")
 )
 
@@ -182,7 +182,7 @@ func readConfig(maxRuntime int) (*Config, error) {
 	if _, err = os.Stat("/etc/systemd/realtime.conf.d/"); os.IsNotExist(err) {
 		return cfg, nil
 	}
-	err = filepath.Walk("/etc/systemd/realtime.conf.d/", func (file string, info os.FileInfo, err error) error {
+	err = filepath.Walk("/etc/systemd/realtime.conf.d/", func(file string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
