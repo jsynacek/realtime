@@ -154,19 +154,18 @@ func (c *Config) readConfig(file string) error {
 			return fmt.Errorf("invalid configuration: %s:%d %q", file, l, string(line))
 		}
 
-		key := string(parts[0])
-		name := unitName(key)
+		name := unitName(string(parts[0]))
 		unit := findUnit(name)
 		if len(unit) == 0 {
 			logInfo("%s does not exist, skipping", name)
 			continue
 		}
 
-		v, ok := c.data[key]
+		v, ok := c.data[name]
 		if ok {
 			c.sum -= v
 		}
-		c.data[key] = val
+		c.data[name] = val
 		c.sum += val
 	}
 	return nil
