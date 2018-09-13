@@ -50,7 +50,7 @@ are discarded.
 Configuration is read from
 .B /etc/systemd/realtime.conf
 and from
-.B /etc/systemd/realtime.cond.d/*.conf
+.B /etc/systemd/realtime.conf.d/*.conf
 and is expected to be in the following format:
 
     <service 1> : <runtime_us 1>
