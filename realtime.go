@@ -174,15 +174,11 @@ func (c *Config) readConfig(file string) error {
 func readConfig(maxRuntime int) (*Config, error) {
 	cfg := newConfig(maxRuntime)
 	err := cfg.readConfig("/etc/systemd/realtime.conf")
-	if err != nil {
+	if err != nil && !os.IsNotExist(err) {
 		return nil, err
 	}
-	// No problem if /etc/systemd/realtime.conf.d doesn't exist.
-	if _, err = os.Stat("/etc/systemd/realtime.conf.d/"); os.IsNotExist(err) {
-		return cfg, nil
-	}
 	err = filepath.Walk("/etc/systemd/realtime.conf.d/", func(file string, info os.FileInfo, err error) error {
-		if err != nil {
+		if err != nil && !os.IsNotExist(err) {
 			return err
 		}
 		if path.Ext(file) == ".conf" {
@@ -193,6 +189,9 @@ func readConfig(maxRuntime int) (*Config, error) {
 		}
 		return nil
 	})
+	if cfg.sum == 0 {
+		return nil, fmt.Errorf("refusing to generate empty (or zero budget) configuration")
+	}
 	if cfg.sum > cfg.max {
 		return nil, fmt.Errorf("invalid configuration: runtime budget too high: %d > %d", cfg.sum, cfg.max)
 	}
